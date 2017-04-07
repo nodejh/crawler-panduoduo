@@ -2,7 +2,7 @@ const Resources = require('./lib/model/resources');
 const getPageContent = require('./lib/crawler/getPageContent');
 const getResourcesContent = require('./lib/crawler/getResourcesContent');
 const logger = require('./lib/utils/winston');
-const { urlPrefix, delayMax, start, end } = require('./config/config');
+const { urlPrefix, delayMax } = require('./config/config');
 
 
 /**
@@ -45,4 +45,4 @@ function main(start, end) {
 }
 
 
-main(1, 10);
+main(1, 389683);
