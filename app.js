@@ -14,8 +14,9 @@ async function crawler(url) {
   try {
     const urls = await getPageContent(url);
     const result = await getResourcesContent(urls);
-    const res = await Resources.insertMany(result);
-    console.log('res: ', res);
+    // const res = await Resources.insertMany(result);
+    await Resources.insertMany(result);
+    logger.warn(`[finish]: ${url}`);
   } catch (e) {
     logger.error(`抓取 ${url} (或存储其数据)出错, ${JSON.stringify(e)}`);
   }
@@ -39,10 +40,11 @@ function main(start, end) {
       logger.info(`现在正在抓取的是 ${url}， 延时 ${delay} 毫秒`);
       setTimeout(() => {
         crawler(url);
-      }, delay);
+      }, delay * j);
     })(i));
   }
 }
 
 
 main(1, 389683);
+// main(1, 10);
