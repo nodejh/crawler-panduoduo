@@ -38,7 +38,7 @@ function main(start, end) {
       const url = `${urlPrefix}/bd/${i}`;
       logger.info(`现在正在抓取的是 ${url}， 延时 ${delay} 毫秒`);
       crawler(url);
-    }, delay * i);
+    }, delay * (i + 1));
   }
 }
 
@@ -59,5 +59,5 @@ function main(start, end) {
 // }
 
 
-// main(1, 389683);
-main(1, 100);
+main(1, 389683);
+// main(1, 100);
