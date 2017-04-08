@@ -30,21 +30,34 @@ async function crawler(url) {
  * @return {null}       null
  */
 function main(start, end) {
-  // 循环所有 URL
+   // 循环所有 URL
   for (let i = start; i <= end; i++) {
-    // 创建闭包，立即执行函数
     // 以实现间隔 delay 毫秒抓取数据
-    ((function immediate(j) {
-      const url = `${urlPrefix}/bd/${j}`;
-      const delay = parseInt((Math.random() * delayMax) % 2000, 10);
+    const delay = parseInt((Math.random() * delayMax) % 2000, 10);
+    setTimeout(() => {
+      const url = `${urlPrefix}/bd/${i}`;
       logger.info(`现在正在抓取的是 ${url}， 延时 ${delay} 毫秒`);
-      setTimeout(() => {
-        crawler(url);
-      }, delay * j);
-    })(i));
+      crawler(url);
+    }, delay * i);
   }
 }
 
+// function main(start, end) {
+//   // 循环所有 URL
+//   for (let i = start; i <= end; i++) {
+//     // 创建闭包，立即执行函数
+//     // 以实现间隔 delay 毫秒抓取数据
+//     ((function immediate(j) {
+//       const url = `${urlPrefix}/bd/${j}`;
+//       const delay = parseInt((Math.random() * delayMax) % 2000, 10);
+//       logger.info(`现在正在抓取的是 ${url}， 延时 ${delay} 毫秒`);
+//       setTimeout(() => {
+//         crawler(url);
+//       }, 1000000 * j);
+//     })(i));
+//   }
+// }
 
-main(1, 389683);
-// main(1, 10);
+
+// main(1, 389683);
+main(1, 100);
