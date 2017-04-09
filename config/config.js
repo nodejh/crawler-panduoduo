@@ -5,6 +5,13 @@ const config = {
   userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36',
   mongodb: 'mongodb://localhost:27017/panduoduo-test',
   delayMax: 20000000, // 最大间隔时间 (约 20000000 / 2000 ms)
+  mysql: {
+    host: 'localhost',
+    user: 'root',
+    password: 'root',
+    port: 3306,
+    database: 'muzhiso_v2',
+  },
 };
 
 

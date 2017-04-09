@@ -1,7 +1,6 @@
 const Resources = require('./lib/model/resources');
 const getPageContent = require('./lib/crawler/getPageContent');
 const getResourcesContent = require('./lib/crawler/getResourcesContent');
-const { query } = require('./lib/db/mysql');
 const logger = require('./lib/utils/winston');
 const { urlPrefix, delayMax } = require('./config/config');
 
@@ -16,21 +15,9 @@ async function crawler(url) {
     const urls = await getPageContent(url);
     const result = await getResourcesContent(urls);
     // const res = await Resources.insertMany(result);
-    console.log('result: ', result);
     await Resources.insertMany(result);
-    const values = result.map((item) => {
-      // return [item.urlPanduoduo, item.title, item.size,
-      //   item.categry, item.date, item.publishDate, item.urlPanbaidu];
-      return [item.title, `${item.title} ${item.urlPanbaidu}`, item.urlPanbaidu, 1, item.date,
-        item.categry, item.size, item.publishDate];
-    });
-    // const sql = 'insert into panduoduo(url_panduoduo,
-    // title, size, categry, date, publish_date, url_panbaidu) values ?';
-    const sql = 'insert into content(title, content, url, userid, date, tags, size, publish_date) values ?';
-    await query(sql, [values]);
     logger.warn(`[finish]: ${url}`);
   } catch (e) {
-    console.log('e: ', e);
     logger.error(`抓取 ${url} (或存储其数据)出错, ${JSON.stringify(e)}`);
   }
 }
@@ -52,6 +39,22 @@ function main(start, end) {
       logger.info(`现在正在抓取的是 ${url}， 延时 ${delay} 毫秒`);
       crawler(url);
     }, delay * (i + 1));
+  }
+}
+
+function main2(start, end) {
+  // 循环所有 URL
+  for (let i = start; i <= end; i++) {
+    // 创建闭包，立即执行函数
+    // 以实现间隔 delay 毫秒抓取数据
+    ((function immediate(j) {
+      const url = `${urlPrefix}/bd/${j}`;
+      const delay = parseInt((Math.random() * delayMax) % 2000, 10);
+      logger.info(`现在正在抓取的是 ${url}， 延时 ${delay} 毫秒`);
+      setTimeout(() => {
+        crawler(url);
+      }, 1000 * j);
+    })(i));
   }
 }
 
