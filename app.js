@@ -2,7 +2,7 @@ const Resources = require('./lib/model/resources');
 const getPageContent = require('./lib/crawler/getPageContent');
 const getResourcesContent = require('./lib/crawler/getResourcesContent');
 const logger = require('./lib/utils/winston');
-const { urlPrefix, delayMax } = require('./config/config');
+const { urlPrefix } = require('./config/config');
 const asyncjs = require('async');
 
 // 开始时间
@@ -13,18 +13,18 @@ console.time('crawler');
  * @param  {string} url 需要抓取的包含具体页面的 URL
  * @return {null}       null
  */
-async function crawler(url) {
-  try {
-    const urls = await getPageContent(url);
-    const result = await getResourcesContent(urls);
-    // const res = await Resources.insertMany(result);
-    await Resources.insertMany(result);
-    logger.warn(`[finish]: ${url}`);
-  } catch (e) {
-    console.log('e: ', e);
-    logger.error(`抓取 ${url} (或存储其数据)出错, ${JSON.stringify(e)}`);
-  }
-}
+// async function crawler(url) {
+//   try {
+//     const urls = await getPageContent(url);
+//     const result = await getResourcesContent(urls);
+//     // const res = await Resources.insertMany(result);
+//     await Resources.insertMany(result);
+//     logger.warn(`[finish]: ${url}`);
+//   } catch (e) {
+//     console.log('e: ', e);
+//     logger.error(`${new Date()} 抓取 ${url} (或存储其数据)出错, ${JSON.stringify(e)}`);
+//   }
+// }
 
 
 /**
@@ -35,7 +35,7 @@ async function crawler(url) {
  */
 function main(start, end) {
   const urls = []; // 所有需要抓取的 url
-  const most = 2; // 并发数
+  const most = 12; // 并发数
   for (let i = start; i <= end; i++) {
     urls.push(`${urlPrefix}/bd/${i}`);
   }
@@ -55,7 +55,7 @@ function main(start, end) {
         callback(null, url);
       })
       .catch((exception) => {
-        logger.error('exception: ', exception);
+        logger.error(`${new Date()} [exception]: ${exception.message}`);
         callback(exception);
       });
   }, most);
@@ -65,17 +65,18 @@ function main(start, end) {
   };
 
   urls.forEach((url, index) => {
-    console.log('index: ', index);
-    queue.push(url, (err, res) => {
-      if (err) {
-        return console.log('err: ', err);
-      }
+    logger.verbose(`${new Date()} index: ${index}`);
+    queue.push(url, (error, res) => {
       console.timeEnd(url);
-      console.warn(`finish: ${start}-${end}-${res}`);
+      if (error) {
+        logger.error(`${new Date()} [抓取 ${url} 出错]: ${error.message}`);
+        return false;
+      }
+      logger.warn(`${new Date()} [finish]: ${start}-${end}-${res}`);
     });
   });
 }
 
 
 // main(1, 389683);
-main(1, 100);
+main(1, 500);
