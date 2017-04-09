@@ -35,7 +35,7 @@ async function crawler(url) {
  */
 function main(start, end) {
   const urls = []; // 所有需要抓取的 url
-  const most = 1; // 并发数
+  const most = 2; // 并发数
   for (let i = start; i <= end; i++) {
     urls.push(`${urlPrefix}/bd/${i}`);
   }
@@ -50,13 +50,12 @@ function main(start, end) {
       .then((datas) => {
         return Resources.insertMany(datas);
       })
-      .then((result) => {
+      .then(() => {
         // console.log('result: ', result);
-        console.timeEnd(url);
         callback(null, url);
       })
       .catch((exception) => {
-        console.log('exception: ', exception);
+        logger.error('exception: ', exception);
         callback(exception);
       });
   }, most);
@@ -71,7 +70,8 @@ function main(start, end) {
       if (err) {
         return console.log('err: ', err);
       }
-      console.warn(`finish: ${url}: ${res}`);
+      console.timeEnd(url);
+      console.warn(`finish: ${res}`);
     });
   });
 }
