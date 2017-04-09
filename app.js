@@ -16,7 +16,7 @@ async function crawler(url) {
     const urls = await getPageContent(url);
     const result = await getResourcesContent(urls);
     // const res = await Resources.insertMany(result);
-    console.log('result: ', result);
+    // console.log('result: ', result);
     await Resources.insertMany(result);
     const values = result.map((item) => {
       // return [item.urlPanduoduo, item.title, item.size,
