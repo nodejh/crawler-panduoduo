@@ -1,10 +1,12 @@
 const Resources = require('./lib/model/resources');
 const getPageContent = require('./lib/crawler/getPageContent');
 const getResourcesContent = require('./lib/crawler/getResourcesContent');
-const { query } = require('./lib/db/mysql');
 const logger = require('./lib/utils/winston');
 const { urlPrefix, delayMax } = require('./config/config');
+const asyncjs = require('async');
 
+// 开始时间
+console.time('crawler');
 
 /**
  * 抓取流程控制
@@ -16,18 +18,7 @@ async function crawler(url) {
     const urls = await getPageContent(url);
     const result = await getResourcesContent(urls);
     // const res = await Resources.insertMany(result);
-    // console.log('result: ', result);
     await Resources.insertMany(result);
-    const values = result.map((item) => {
-      // return [item.urlPanduoduo, item.title, item.size,
-      //   item.categry, item.date, item.publishDate, item.urlPanbaidu];
-      return [item.title, `${item.title} ${item.urlPanbaidu}`, item.urlPanbaidu, 1, item.date,
-        item.categry, item.size, item.publishDate];
-    });
-    // const sql = 'insert into panduoduo(url_panduoduo,
-    // title, size, categry, date, publish_date, url_panbaidu) values ?';
-    const sql = 'insert into content(title, content, url, userid, date, tags, size, publish_date) values ?';
-    await query(sql, [values]);
     logger.warn(`[finish]: ${url}`);
   } catch (e) {
     console.log('e: ', e);
@@ -43,18 +34,48 @@ async function crawler(url) {
  * @return {null}       null
  */
 function main(start, end) {
-   // 循环所有 URL
+  const urls = []; // 所有需要抓取的 url
+  const most = 1; // 并发数
   for (let i = start; i <= end; i++) {
-    // 以实现间隔 delay 毫秒抓取数据
-    const delay = parseInt((Math.random() * delayMax) % 2000, 10);
-    setTimeout(() => {
-      const url = `${urlPrefix}/bd/${i}`;
-      logger.info(`现在正在抓取的是 ${url}， 延时 ${delay} 毫秒`);
-      crawler(url);
-    }, delay * (i + 1));
+    urls.push(`${urlPrefix}/bd/${i}`);
   }
+  console.log(`总页数 ${urls.length}`);
+  const queue = asyncjs.queue((url, callback) => {
+    console.time(url);
+    getPageContent(url)
+      .then((urlsCurrentPage) => {
+        // console.log('urlsCurrentPage: ', urlsCurrentPage);
+        return getResourcesContent(urlsCurrentPage);
+      })
+      .then((datas) => {
+        return Resources.insertMany(datas);
+      })
+      .then((result) => {
+        // console.log('result: ', result);
+        console.timeEnd(url);
+        callback(null, url);
+      })
+      .catch((exception) => {
+        console.log('exception: ', exception);
+        callback(exception);
+      });
+  }, most);
+
+  queue.drain = () => {
+    console.timeEnd('crawler');
+  };
+
+  urls.forEach((url, index) => {
+    console.log('index: ', index);
+    queue.push(url, (err, res) => {
+      if (err) {
+        return console.log('err: ', err);
+      }
+      console.warn(`finish: ${url}: ${res}`);
+    });
+  });
 }
 
 
-// main2(1, 389683);
-main(1, 100);
+// main(1, 389683);
+main(1, 10);
