@@ -71,11 +71,11 @@ function main(start, end) {
         return console.log('err: ', err);
       }
       console.timeEnd(url);
-      console.warn(`finish: ${res}`);
+      console.warn(`finish: ${start}-${end}-${res}`);
     });
   });
 }
 
 
 // main(1, 389683);
-main(1, 10);
+main(1, 100);
