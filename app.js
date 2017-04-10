@@ -2,29 +2,11 @@ const Resources = require('./lib/model/resources');
 const getPageContent = require('./lib/crawler/getPageContent');
 const getResourcesContent = require('./lib/crawler/getResourcesContent');
 const logger = require('./lib/utils/winston');
-const { urlPrefix } = require('./config/config');
+const { urlPrefix, mostPage } = require('./config/config');
 const asyncjs = require('async');
 
-// 开始时间
-console.time('crawler');
-
-/**
- * 抓取流程控制
- * @param  {string} url 需要抓取的包含具体页面的 URL
- * @return {null}       null
- */
-// async function crawler(url) {
-//   try {
-//     const urls = await getPageContent(url);
-//     const result = await getResourcesContent(urls);
-//     // const res = await Resources.insertMany(result);
-//     await Resources.insertMany(result);
-//     logger.warn(`[finish]: ${url}`);
-//   } catch (e) {
-//     console.log('e: ', e);
-//     logger.error(`${new Date()} 抓取 ${url} (或存储其数据)出错, ${JSON.stringify(e)}`);
-//   }
-// }
+// 开始计时（总时间）
+console.time('抓取总耗时');
 
 
 /**
@@ -35,48 +17,59 @@ console.time('crawler');
  */
 function main(start, end) {
   const urls = []; // 所有需要抓取的 url
-  const most = 12; // 并发数
   for (let i = start; i <= end; i++) {
     urls.push(`${urlPrefix}/bd/${i}`);
   }
-  console.log(`总页数 ${urls.length}`);
+  logger.silly(`总页数 ${urls.length}`);
   const queue = asyncjs.queue((url, callback) => {
-    console.time(url);
+    // 开始记录抓取某个 URL 的时间
+    console.time(`[page] 抓取 ${url} 耗时`);
     getPageContent(url)
       .then((urlsCurrentPage) => {
-        // console.log('urlsCurrentPage: ', urlsCurrentPage);
-        return getResourcesContent(urlsCurrentPage);
+        // console.log('urlsCurrentPage: ', urlsCurrentPage.length);
+        // console.log('urlsCurrentPage[0]: ', urlsCurrentPage[0]);
+        return getResourcesContent(urlsCurrentPage, url);
       })
       .then((datas) => {
+        // console.log('datas: ', datas.length);
         return Resources.insertMany(datas);
       })
       .then(() => {
-        // console.log('result: ', result);
-        callback(null, url);
+        // console.log('result: ', result.length);
+        callback(null);
       })
       .catch((exception) => {
-        logger.error(`${new Date()} [exception]: ${exception.message}`);
+        // logger.error(`${new Date()} [error]: ${exception.message}`);
         callback(exception);
       });
-  }, most);
+  }, mostPage);
 
   queue.drain = () => {
-    console.timeEnd('crawler');
+    console.timeEnd('抓取总耗时');
   };
 
   urls.forEach((url, index) => {
-    logger.verbose(`${new Date()} index: ${index}`);
-    queue.push(url, (error, res) => {
-      console.timeEnd(url);
+    logger.silly(`${new Date()} index: ${index}`);
+    queue.push(url, (error) => {
+      console.timeEnd(`[page] 抓取 ${url} 耗时`);
       if (error) {
-        logger.error(`${new Date()} [抓取 ${url} 出错]: ${error.message}`);
+        // 抓取异常
+        // 抓取某页以及存储数据库的错误最终都会流向这里
+        logger.error(`${new Date()} [error]: ${url} ${error.message}`);
         return false;
       }
-      logger.warn(`${new Date()} [finish]: ${start}-${end}-${res}`);
+      // 抓取某页数据完毕（抓取完毕某一个 URL）
+      logger.warn(`${new Date()} [finish]: ${url}`);
     });
   });
 }
 
 
+// 监听未捕获的异常，并将错误写入文件
+process.on('uncaughtException', (err) => {
+  logger.error(`uncaughtException: ${err.message}`);
+});
+
+
 // main(1, 389683);
-main(1, 500);
+main(1, 2);
