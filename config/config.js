@@ -14,6 +14,16 @@ const config = {
     port: 3306,
     database: 'muzhiso_v2',
   },
+
+  // 邮箱设置
+  email: {
+    to: '3478795306@qq.com',
+    from: '"Hang Jiang 👻" <jianghangscu@163.com>',
+    host: 'smtp.163.com',
+    secure: true,
+    username: 'jianghangscu@163.com',
+    password: '131420ab',
+  },
 };
 
 

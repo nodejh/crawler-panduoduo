@@ -1,13 +1,13 @@
+const asyncjs = require('async');
 const Resources = require('./lib/model/resources');
 const getPageContent = require('./lib/crawler/getPageContent');
 const getResourcesContent = require('./lib/crawler/getResourcesContent');
 const logger = require('./lib/utils/winston');
 const { urlPrefix, mostPage } = require('./config/config');
-const asyncjs = require('async');
 
 // 开始计时（总时间）
 console.time('抓取总耗时');
-
+const startDate = new Date();
 
 /**
  * 主函数
@@ -45,6 +45,7 @@ function main(start, end) {
   }, mostPage);
 
   queue.drain = () => {
+    logger.error(`👻 抓取总耗时: ${new Date() - startDate}`);
     console.timeEnd('抓取总耗时');
   };
 
@@ -55,7 +56,7 @@ function main(start, end) {
       if (error) {
         // 抓取异常
         // 抓取某页以及存储数据库的错误最终都会流向这里
-        logger.error(`${new Date()} [error]: ${url} ${error.message}`);
+        logger.error(`${new Date()} [error]: ${url} ${error.message} ${error.stack}`);
         return false;
       }
       // 抓取某页数据完毕（抓取完毕某一个 URL）
@@ -67,9 +68,21 @@ function main(start, end) {
 
 // 监听未捕获的异常，并将错误写入文件
 process.on('uncaughtException', (err) => {
-  logger.error(`uncaughtException: ${err.message}`);
+  logger.error(`uncaughtException: \n ${err.stack}`);
 });
 
 
 // main(1, 389683);
 main(1, 2);
+// try {
+//   console.log('a : ', a.toString());
+// } catch (err) {
+//   console.log('e: ', err);
+//   // const mailOptions = {
+//   //   subject: `uncaughtException: ${err.message}`, // Subject line
+//   //   text: err.stack, // plain text body
+//   //   html: err.stack, // html body
+//   // };
+//   // sendMail(mailOptions);
+//   logger.error(`${new Date()} \n ${err.stack}`);
+// }
