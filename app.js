@@ -14,6 +14,9 @@ const argvStart = process.argv[2];
 const argvEnd = process.argv[3];
 const startNum = parseInt(argvStart, 10) * 10000;
 const endNum = parseInt(argvEnd, 10) * 10000;
+console.log('startNum: ', startNum);
+console.log('endNum: ', endNum);
+
 
 /**
  * 主函数
@@ -102,7 +105,7 @@ process.on('uncaughtException', (err) => {
 // console.log(a.aa);
 
 
-if (startNum && endNum && parseInt(startNum, 10) > -1 && parseInt(endNum, 10) > -1) {
+if (parseInt(startNum, 10) > -1 && parseInt(endNum, 10) > -1) {
   console.log('startNum: ', startNum);
   console.log('endNum: ', endNum);
   main(startNum, endNum);
