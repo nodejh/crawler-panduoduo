@@ -82,7 +82,7 @@ function main(start, end) {
 // 监听未捕获的异常，并将错误写入文件
 process.on('uncaughtException', (err) => {
   logger.error(`uncaughtException: \n ${err.stack}`);
-  const subject = ` 🤒 抓取第 ${startNum} 至 ${endNum} 页出错， ${err.message}`;
+  const subject = `😈 [ERROR]第 ${startNum} 至 ${endNum} 页， ${err.message}`;
   const text = `抓取 ${startNum} 至 ${endNum} 页出错，${err.stack}`;
   const html = `<div>抓取第 <b style="color: red;">${startNum}</b> 至 <b style="color: red;">${endNum}</b> 页出错， <br/><br/> <p>${err.stack}</p></div>`;
   sendMail(subject, text, html);
