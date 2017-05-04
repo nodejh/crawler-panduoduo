@@ -9,9 +9,11 @@ const { urlPrefix, mostPage } = require('./config/config');
 // 开始计时（总时间）
 console.time('抓取总耗时');
 const startDate = new Date();
-const startNum = process.argv[2];
-const endNum = process.argv[3];
 
+const argvStart = process.argv[2];
+const argvEnd = process.argv[3];
+const startNum = parseInt(argvStart, 10) * 10000;
+const endNum = parseInt(argvEnd, 10) * 10000;
 
 /**
  * 主函数
@@ -101,11 +103,9 @@ process.on('uncaughtException', (err) => {
 
 
 if (startNum && endNum && parseInt(startNum, 10) > -1 && parseInt(endNum, 10) > -1) {
-  const start = parseInt(startNum, 10) * 10000;
-  const end = parseInt(endNum, 10) * 10000;
   console.log('startNum: ', startNum);
   console.log('endNum: ', endNum);
-  main(start, end);
+  main(startNum, endNum);
 } else {
   console.log('参数错误');
 }
