@@ -12,8 +12,8 @@ const startDate = new Date();
 
 const argvStart = process.argv[2];
 const argvEnd = process.argv[3];
-const startNum = parseInt(argvStart, 10) * 10000;
-const endNum = parseInt(argvEnd, 10) * 10000;
+const startNum = parseFloat(argvStart) * 10000;
+const endNum = parseFloat(argvEnd) * 10000;
 console.log('startNum: ', startNum);
 console.log('endNum: ', endNum);
 
@@ -105,7 +105,7 @@ process.on('uncaughtException', (err) => {
 // console.log(a.aa);
 
 
-if (parseInt(startNum, 10) > -1 && parseInt(endNum, 10) > -1) {
+if (startNum > -1 && endNum > -1) {
   console.log('startNum: ', startNum);
   console.log('endNum: ', endNum);
   main(startNum, endNum);
